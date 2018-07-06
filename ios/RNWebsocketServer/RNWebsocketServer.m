@@ -7,7 +7,7 @@
 //
 
 #import "RNWebsocketServer.h"
-#import "PSWebSocketServer.h"
+#import <PocketSocket/PSWebSocketServer.h>
 
 @interface RNWebsocketServer () <PSWebSocketServerDelegate>
 
@@ -34,6 +34,11 @@ RCT_EXPORT_METHOD(start: (NSString *) ipAddress
     [self.server start];
 }
 
+RCT_EXPORT_METHOD(stop)
+{
+    [self.server stop];
+}
+
 - (BOOL)server:(PSWebSocketServer *)server acceptWebSocketFrom:(NSData*)address withRequest:(NSURLRequest *)request trust:(SecTrustRef)trust response:(NSHTTPURLResponse **)response {
     NSLog(@"Websocket Request: %@", request);
 
@@ -51,7 +56,6 @@ RCT_EXPORT_METHOD(start: (NSString *) ipAddress
 }
 - (void)serverDidStop:(PSWebSocketServer *)server {
     NSLog(@"Websocket serverDidStop");
-    [NSException raise:NSInternalInconsistencyException format:@"Server stopped unexpected."];
 }
 
 - (void)server:(PSWebSocketServer *)server webSocketDidOpen:(PSWebSocket *)webSocket {
@@ -66,7 +70,6 @@ RCT_EXPORT_METHOD(start: (NSString *) ipAddress
     NSData *jsonObject = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&error];
     
     for (PSWebSocket *connection in [server getWebsocketConnections]) {
-        NSLog(@"Websocket onmessage send: %@", [connection URLRequest]);
         [connection send:[[NSString alloc] initWithData:jsonObject encoding:NSUTF8StringEncoding]];
     }
 }
